@@ -1,1 +1,222 @@
-<h1>My Portfolio</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relaxing Visual Effects</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background: #1a1a1a;
+            overflow: hidden;
+        }
+
+        .effect-container {
+            flex-grow: 1;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .button-container {
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background: #4a4a4a;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: #666;
+            transform: translateY(-2px);
+        }
+
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            pointer-events: none;
+        }
+
+        .gradient-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="effect-container" id="effectContainer"></div>
+    <div class="button-container">
+        <button onclick="startBubbles()">Bubbles</button>
+        <button onclick="startRipples()">Ripples</button>
+        <button onclick="startGradient()">Gradient</button>
+        <button onclick="startStars()">Stars</button>
+        <button onclick="clearEffects()">Clear</button>
+    </div>
+
+    <script>
+        const container = document.getElementById('effectContainer');
+        let effects = [];
+
+        function clearEffects() {
+            effects.forEach(effect => effect.remove());
+            effects = [];
+        }
+
+        function startBubbles() {
+            clearEffects();
+            for (let i = 0; i < 20; i++) {
+                const bubble = document.createElement('div');
+                bubble.className = 'particle';
+                bubble.style.width = Math.random() * 30 + 10 + 'px';
+                bubble.style.height = bubble.style.width;
+                bubble.style.background = `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.5)`;
+                bubble.style.left = Math.random() * 100 + '%';
+                bubble.style.top = Math.random() * 100 + '%';
+                container.appendChild(bubble);
+                effects.push(bubble);
+
+                animateBubble(bubble);
+            }
+        }
+
+        function animateBubble(bubble) {
+            let x = parseFloat(bubble.style.left);
+            let y = parseFloat(bubble.style.top);
+            let speedX = (Math.random() - 0.5) * 2;
+            let speedY = (Math.random() - 0.5) * 2;
+
+            function animate() {
+                x += speedX;
+                y += speedY;
+
+                if (x < 0 || x > 100) speedX *= -1;
+                if (y < 0 || y > 100) speedY *= -1;
+
+                bubble.style.left = x + '%';
+                bubble.style.top = y + '%';
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+        }
+
+        function startRipples() {
+            clearEffects();
+            container.addEventListener('click', createRipple);
+        }
+
+        function createRipple(e) {
+            const ripple = document.createElement('div');
+            ripple.className = 'ripple';
+            ripple.style.left = e.clientX + 'px';
+            ripple.style.top = e.clientY + 'px';
+            ripple.style.width = '0';
+            ripple.style.height = '0';
+            container.appendChild(ripple);
+            effects.push(ripple);
+
+            let size = 0;
+            const maxSize = 300;
+            const speed = 5;
+
+            function animate() {
+                size += speed;
+                ripple.style.width = size + 'px';
+                ripple.style.height = size + 'px';
+                ripple.style.opacity = 1 - (size / maxSize);
+
+                if (size < maxSize) {
+                    requestAnimationFrame(animate);
+                } else {
+                    ripple.remove();
+                    effects = effects.filter(e => e !== ripple);
+                }
+            }
+
+            animate();
+        }
+
+        function startGradient() {
+            clearEffects();
+            const gradient = document.createElement('div');
+            gradient.className = 'gradient-bg';
+            gradient.style.background = 'linear-gradient(45deg, #ff6b6b, #4ecdc4)';
+            container.appendChild(gradient);
+            effects.push(gradient);
+
+            let hue = 0;
+            function animate() {
+                hue = (hue + 1) % 360;
+                gradient.style.background = `linear-gradient(45deg, 
+                    hsl(${hue}, 70%, 60%), 
+                    hsl(${(hue + 60) % 360}, 70%, 60%))`;
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+        }
+
+        function startStars() {
+            clearEffects();
+            for (let i = 0; i < 50; i++) {
+                const star = document.createElement('div');
+                star.className = 'particle';
+                star.style.width = Math.random() * 3 + 'px';
+                star.style.height = star.style.width;
+                star.style.background = 'white';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                container.appendChild(star);
+                effects.push(star);
+
+                animateStar(star);
+            }
+        }
+
+        function animateStar(star) {
+            let opacity = Math.random();
+            let increasing = true;
+
+            function animate() {
+                if (increasing) {
+                    opacity += 0.02;
+                    if (opacity >= 1) increasing = false;
+                } else {
+                    opacity -= 0.02;
+                    if (opacity <= 0) increasing = true;
+                }
+                star.style.opacity = opacity;
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+        }
+    </script>
+</body>
+</html>
