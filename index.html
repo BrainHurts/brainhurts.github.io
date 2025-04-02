@@ -55,8 +55,9 @@
         .ripple {
             position: absolute;
             border-radius: 50%;
-            border: 2px solid rgba(255, 255, 255, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.8);
             pointer-events: none;
+            transform: translate(-50%, -50%);
         }
 
         .gradient-bg {
@@ -128,14 +129,21 @@
 
         function startRipples() {
             clearEffects();
-            container.addEventListener('click', createRipple);
+            const clickHandler = (e) => {
+                const rect = container.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                createRipple(x, y);
+            };
+            container.addEventListener('click', clickHandler);
+            effects.push({ remove: () => container.removeEventListener('click', clickHandler) });
         }
 
-        function createRipple(e) {
+        function createRipple(x, y) {
             const ripple = document.createElement('div');
             ripple.className = 'ripple';
-            ripple.style.left = e.clientX + 'px';
-            ripple.style.top = e.clientY + 'px';
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
             ripple.style.width = '0';
             ripple.style.height = '0';
             container.appendChild(ripple);
